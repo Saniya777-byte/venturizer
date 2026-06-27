@@ -2,22 +2,24 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "src/server.js",
- "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
-  "test": "jest"
-},
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "prisma": "^6.16.2"
   },
   "devDependencies": {
     "jest": "^30.4.2",
