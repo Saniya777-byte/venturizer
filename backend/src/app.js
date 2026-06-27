@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const leadRoutes = require("./routes/lead.routes");
 
 const app = express();
 
@@ -31,5 +32,7 @@ app.get("/health", (req,res)=>{
         message:"Server is healthy"
     });
 });
+
+app.use("/api/leads", leadRoutes);
 
 module.exports = app;
