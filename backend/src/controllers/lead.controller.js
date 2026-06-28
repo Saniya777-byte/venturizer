@@ -1,46 +1,58 @@
-const prisma = require("../database/prisma");
-const { leadSchema } = require("../validators/lead.validator");
+const leadService = require("../services/lead.service");
+const { evaluateAnswer } = require("../services/gemini.service");
 
 const createLead = async (req, res) => {
-  try {
-    const data = leadSchema.parse(req.body);
+  const lead = await leadService.createLead(req.body);
 
-    const lead = await prisma.lead.create({
-      data: {
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone,
-        linkedIn: data.linkedIn,
-        type: data.type,
+  res.status(201).json({
+    success: true,
+    data: lead,
+  });
+};
 
-        founder:
-          data.type === "FOUNDER"
-            ? {
-                create: data.founder,
-              }
-            : undefined,
+const listLeads = async (req, res) => {
+  const result = await leadService.listLeads(req.validated.query);
 
-        investor:
-          data.type === "INVESTOR"
-            ? {
-                create: data.investor,
-              }
-            : undefined,
-      },
-      include: {
-        founder: true,
-        investor: true,
-      },
-    });
+  res.json({
+    success: true,
+    data: result.items,
+    pagination: result.pagination,
+  });
+};
 
-    res.status(201).json(lead);
-  } catch (error) {
-    res.status(400).json({
-      message: error.message,
-    });
-  }
+const getLeadById = async (req, res) => {
+  const lead = await leadService.getLeadById(req.validated.params.id);
+
+  res.json({
+    success: true,
+    data: lead,
+  });
+};
+
+const updateLeadStatus = async (req, res) => {
+  const lead = await leadService.updateLeadStatus(req.validated.params.id, req.body.status);
+
+  res.json({
+    success: true,
+    data: lead,
+  });
+};
+
+const validateAnswer = async (req, res) => {
+  const { field, answer } = req.body;
+  const result = await evaluateAnswer(field, answer);
+
+  res.json({
+    success: true,
+    data: result,
+  });
 };
 
 module.exports = {
   createLead,
+  listLeads,
+  getLeadById,
+  updateLeadStatus,
+  validateAnswer,
 };
+
