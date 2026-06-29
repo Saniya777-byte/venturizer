@@ -1,33 +1,53 @@
-import { lazy, Suspense, useState } from 'react'
-import Chatbot from './components/Chatbot'
-import StateBlock from './components/StateBlock'
-import './App.css'
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import Chatbot from './components/Chatbot';
+import StateBlock from './components/StateBlock';
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
 
-const Dashboard = lazy(() => import('./components/Dashboard'))
+const Dashboard = lazy(() => import('./components/Dashboard'));
 
-function App() {
-  const [view, setView] = useState('chat')
+function Layout({ children }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const handleDashboardClick = () => {
+    const isAuthed = localStorage.getItem('venturizer_authenticated') === 'true';
+    if (isAuthed) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand" type="button" onClick={() => setView('chat')} aria-label="Venturizer home">
+        <button
+          className="brand"
+          type="button"
+          onClick={() => navigate('/')}
+          aria-label="Venturizer home"
+        >
           Venturizer
         </button>
         <nav className="nav-tabs" aria-label="Primary navigation">
           <button
-            className={view === 'chat' ? 'active' : ''}
+            className={currentPath === '/chat' ? 'active' : ''}
             type="button"
-            aria-current={view === 'chat' ? 'page' : undefined}
-            onClick={() => setView('chat')}
+            aria-current={currentPath === '/chat' ? 'page' : undefined}
+            onClick={() => navigate('/chat')}
           >
             Assistant
           </button>
           <button
-            className={view === 'dashboard' ? 'active' : ''}
+            className={currentPath === '/dashboard' ? 'active' : ''}
             type="button"
-            aria-current={view === 'dashboard' ? 'page' : undefined}
-            onClick={() => setView('dashboard')}
+            aria-current={currentPath === '/dashboard' ? 'page' : undefined}
+            onClick={handleDashboardClick}
           >
             Dashboard
           </button>
@@ -35,16 +55,51 @@ function App() {
       </header>
 
       <main id="main-content">
-        {view === 'chat' ? (
-          <Chatbot />
-        ) : (
-          <Suspense fallback={<StateBlock title="Loading dashboard" message="Preparing lead data…" />}>
-            <Dashboard />
-          </Suspense>
-        )}
+        {children}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Dashboard Login Page */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Existing Chatbot */}
+        <Route
+          path="/chat"
+          element={
+            <Layout>
+              <Chatbot />
+            </Layout>
+          }
+        />
+
+        {/* Existing Dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Suspense fallback={<StateBlock title="Loading dashboard" message="Preparing lead data…" />}>
+                  <Dashboard />
+                </Suspense>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
