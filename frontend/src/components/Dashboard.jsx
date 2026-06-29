@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getDashboard, getLeads } from '../api/client'
 import { getApiErrorMessage, STATUSES, TYPES, formatNumber, formatDate, getLeadName } from '../utils/lead'
 import Charts from './Charts'
@@ -19,6 +20,7 @@ const INITIAL_FILTERS = {
 }
 
 function Dashboard() {
+  const navigate = useNavigate()
   const [dashboard, setDashboard] = useState(null)
   const [leads, setLeads] = useState([])
   const [pagination, setPagination] = useState(null)
@@ -86,6 +88,17 @@ function Dashboard() {
           <h1>Lead Qualification</h1>
           <p>Review founder and investor submissions in one place.</p>
         </div>
+        <button
+          className="secondary-btn"
+          type="button"
+          onClick={() => {
+            localStorage.removeItem('venturizer_authenticated')
+            navigate('/login')
+          }}
+          style={{ height: 'fit-content', alignSelf: 'center' }}
+        >
+          Logout
+        </button>
       </div>
 
       {error ? (
